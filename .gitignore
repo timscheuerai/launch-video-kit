@@ -21,6 +21,8 @@ film/assets/brand/
 film/vo/body/*.wav
 film/vo/body/lines.json
 film/vo/body/takes.json
+film/vo/raw/
+film/vo/scratch/
 film/score/*.wav
 film/score/bed.json
 *.log

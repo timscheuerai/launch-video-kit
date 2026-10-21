@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voice takes</title>
+<style>
+  :root { --bg: #121212; --ink: #ffffff; --dim: rgba(255, 255, 255, 0.28); --mute: rgba(255, 255, 255, 0.55);
+    --accent: #3d7bfd; --line: rgba(255, 255, 255, 0.1); --ok: #3ccf7a; --rec: #ff4d4f; --display: Georgia, serif; --body: system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: var(--body); }
+  body { display: grid; grid-template-columns: 280px 1fr; grid-template-rows: auto 1fr; height: 100vh; }
+  header { grid-column: 1 / -1; display: flex; align-items: center; gap: 20px; padding: 16px 24px; border-bottom: 1px solid var(--line); }
+  header b { font-weight: 600; }
+  header .sp { flex: 1; }
+  .meter { width: 160px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 0; background: var(--ok); transition: width 60ms linear; }
+  .meter.hot i { background: var(--rec); }
+  aside { border-right: 1px solid var(--line); overflow-y: auto; padding: 8px 0; }
+  aside button { all: unset; display: flex; gap: 10px; width: 100%; padding: 10px 20px; cursor: pointer; color: var(--mute); font-size: 14px; line-height: 1.35; }
+  aside button:hover { background: rgba(255, 255, 255, 0.04); }
+  aside button.on { color: var(--ink); background: rgba(255, 255, 255, 0.07); }
+  aside .id { width: 30px; flex: none; font-variant-numeric: tabular-nums; opacity: 0.7; }
+  aside .tick { width: 14px; flex: none; color: var(--ok); }
+  main { display: flex; flex-direction: column; justify-content: center; padding: 48px 8vw; min-height: 0; }
+  .count { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); margin-bottom: 24px; }
+  .prompt { font-family: var(--display); font-size: clamp(36px, 5.2vw, 76px); line-height: 1.18; letter-spacing: -0.01em; min-height: 3.6em; }
+  .prompt span { color: var(--dim); transition: color 120ms ease; }
+  .prompt span.lit { color: var(--ink); }
+  .prompt span.now { color: var(--ink); text-shadow: 0 0 24px rgba(255, 255, 255, 0.35); }
+  .status { margin-top: 32px; font-size: 18px; color: var(--mute); height: 80px; display: flex; align-items: center; gap: 12px; }
+  .status .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--rec); animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { opacity: 0.3; } }
+  .big { font-family: var(--display); font-size: 64px; color: var(--ink); }
+  .controls { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .controls button { font: inherit; font-size: 15px; padding: 12px 18px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.05); color: var(--ink); cursor: pointer; }
+  .controls button.primary { background: var(--accent); border-color: var(--accent); }
+  .controls button.stop { background: var(--rec); border-color: var(--rec); }
+  .controls button:disabled { opacity: 0.35; cursor: default; }
+  .controls kbd { font: 12px ui-monospace, monospace; opacity: 0.7; margin-left: 8px; }
+  label.guide { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--mute); font-size: 14px; }
+  .err { color: var(--rec); }
+  @media (max-width: 760px) { body { grid-template-columns: 1fr; } aside { display: none; } main { padding: 32px 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <b id="brand">Voice takes</b>
+  <span id="progress" style="color:var(--mute)"></span>
+  <span class="sp"></span>
+  <span style="color:var(--mute);font-size:13px">Mic</span>
+  <div class="meter" id="meter"><i></i></div>
+</header>
+<aside id="list"></aside>
+<main>
+  <div class="count" id="count"></div>
+  <div class="prompt" id="prompt"></div>
+  <div class="status" id="status"></div>
+  <div class="controls">
+    <button class="primary" id="rec">Record<kbd>Space</kbd></button>
+    <button id="play" disabled>Play take<kbd>P</kbd></button>
+    <button id="prev">Back<kbd>←</kbd></button>
+    <button id="next">Next<kbd>→</kbd></button>
+    <label class="guide"><input type="checkbox" id="guide" checked> Pace guide</label>
+  </div>
+</main>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var lines = [], i = 0, state = "idle", stream = null, rec = null, chunks = [], timers = [], raf = 0, audio = null;
+
+  function setStatus(html) { $("status").innerHTML = html; }
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; cancelAnimationFrame(raf); }
+
+  function renderList() {
+    var done = lines.filter(function (l) { return l.recorded; }).length;
+    $("progress").textContent = done + " of " + lines.length + " recorded";
+    $("list").innerHTML = "";
+    lines.forEach(function (l, k) {
+      var b = document.createElement("button");
+      b.className = k === i ? "on" : "";
+      b.innerHTML = '<span class="tick">' + (l.recorded ? "✓" : "") + '</span><span class="id">' + l.id + "</span><span></span>";
+      b.lastChild.textContent = l.text;
+      b.onclick = function () { if (state === "idle") go(k); };
+      $("list").appendChild(b);
+    });
+  }
+
+  function renderLine() {
+    var l = lines[i];
+    $("count").textContent = "Line " + (i + 1) + " of " + lines.length + (l.recorded ? "  ·  recorded" : "");
+    $("prompt").innerHTML = "";
+    l.words.forEach(function (w) { var s = document.createElement("span"); s.textContent = w[0] + " "; $("prompt").appendChild(s); });
+    $("play").disabled = !l.recorded;
+    setStatus(l.recorded ? "Recorded. Space to redo, P to play, → for the next line." : "Read it through once, then Space to record.");
+    renderList();
+  }
+
+  function go(k) { if (k < 0 || k >= lines.length) return; stopAudio(); i = k; renderLine(); }
+
+  function light(upTo, now) {
+    Array.prototype.forEach.call($("prompt").children, function (s, k) {
+      s.className = k < upTo ? "lit" : k === upTo && now ? "now" : "";
+    });
+  }
+
+  function startMeter() {
+    var ctx = new AudioContext(), an = ctx.createAnalyser(), buf = new Float32Array(1024);
+    an.fftSize = 2048; ctx.createMediaStreamSource(stream).connect(an);
+    (function tick() {
+      an.getFloatTimeDomainData(buf);
+      var p = 0; for (var k = 0; k < buf.length; k++) p = Math.max(p, Math.abs(buf[k]));
+      var db = 20 * Math.log10(p + 1e-6), w = Math.max(0, Math.min(1, (db + 60) / 60));
+      $("meter").firstChild.style.width = (w * 100).toFixed(0) + "%";
+      $("meter").classList.toggle("hot", db > -3);
+      requestAnimationFrame(tick);
+    })();
+  }
+
+  function mic() {
+    if (stream) return Promise.resolve(stream);
+    return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1, sampleRate: { ideal: 48000 } } })
+      .then(function (s) { stream = s; startMeter(); return s; });
+  }
+
+  function record() {
+    if (state !== "idle") return;
+    stopAudio();
+    state = "count";
+    $("rec").disabled = true;
+    mic().then(function () {
+      // record through the countdown too, so a read that starts early is never clipped (the server trims the silence)
+      var type = ["audio/webm;codecs=opus", "audio/mp4", "audio/ogg"].filter(function (t) { return window.MediaRecorder && MediaRecorder.isTypeSupported(t); })[0] || "";
+      chunks = [];
+      rec = new MediaRecorder(stream, type ? { mimeType: type } : {});
+      rec.ondataavailable = function (e) { if (e.data.size) chunks.push(e.data); };
+      rec.onstop = upload;
+      rec.start();
+      var n = 3;
+      (function step() {
+        if (n > 0) { setStatus('<span class="big">' + n + "</span>"); n--; timers.push(setTimeout(step, 650)); return; }
+        begin();
+      })();
+    }).catch(function (e) { state = "idle"; $("rec").disabled = false; setStatus('<span class="err">No microphone: ' + e.message + "</span>"); });
+  }
+
+  function begin() {
+    state = "rec";
+    $("rec").disabled = false; $("rec").className = "stop"; $("rec").firstChild.textContent = "Stop";
+    setStatus('<span class="dot"></span> Recording. Space to stop.');
+    var l = lines[i], t0 = performance.now() + 250, pace = 1.1, n = l.words.length, end = l.words[n - 1][1] * pace + 0.5;
+    if ($("guide").checked) {
+      (function tick() {
+        var t = (performance.now() - t0) / 1000, k = 0;
+        while (k < n && l.words[k][1] * pace <= t) k++;
+        light(k - 1, true);
+        if (t < end && state === "rec") raf = requestAnimationFrame(tick);
+        else light(n, false);
+      })();
+    } else {
+      light(l.words.length, false);
+    }
+  }
+
+  function stop() {
+    if (state !== "rec") return;
+    clearTimers();
+    state = "saving";
+    $("rec").className = "primary"; $("rec").firstChild.textContent = "Record"; $("rec").disabled = true;
+    setStatus("Saving…");
+    rec.stop();
+  }
+
+  function upload() {
+    var l = lines[i], blob = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
+    fetch("/take?line=" + encodeURIComponent(l.id), { method: "POST", headers: { "Content-Type": blob.type }, body: blob })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        state = "idle"; $("rec").disabled = false;
+        if (d.error) { setStatus('<span class="err">' + d.error + "</span>"); return; }
+        l.recorded = true;
+        renderLine();
+        var all = d.done === d.total;
+        setStatus("Saved, " + d.dur + " s. " + (all ? "That's every line. Tell Claude you're done." : "P to play, Space to redo, → for the next line."));
+      })
+      .catch(function (e) { state = "idle"; $("rec").disabled = false; setStatus('<span class="err">Save failed: ' + e.message + "</span>"); });
+  }
+
+  function stopAudio() { if (audio) { audio.pause(); audio = null; } }
+  function play() {
+    if (state !== "idle" || !lines[i].recorded) return;
+    stopAudio();
+    audio = new Audio("/take?line=" + encodeURIComponent(lines[i].id) + "&t=" + Date.now());
+    audio.play();
+  }
+
+  $("rec").onclick = function () { state === "rec" ? stop() : record(); };
+  $("play").onclick = play;
+  $("prev").onclick = function () { if (state === "idle") go(i - 1); };
+  $("next").onclick = function () { if (state === "idle") go(i + 1); };
+  document.addEventListener("keydown", function (e) {
+    if (e.target.tagName === "INPUT") return;
+    if (e.code === "Space") { e.preventDefault(); state === "rec" ? stop() : record(); }
+    else if (e.key === "ArrowRight" || e.key === "Enter") { if (state === "idle") go(i + 1); }
+    else if (e.key === "ArrowLeft") { if (state === "idle") go(i - 1); }
+    else if (e.key === "p" || e.key === "P") play();
+  });
+
+  fetch("/brand").then(function (r) { return r.json(); }).then(function (b) {
+    var root = document.documentElement.style, c = b.colors || {}, f = b.fonts || {};
+    if (c.dark) root.setProperty("--bg", c.dark);
+    if (c.accent) root.setProperty("--accent", c.accent);
+    if (b.name) $("brand").textContent = b.name + " · voice takes";
+    [["display", f.display], ["body", f.body]].forEach(function (p) {
+      if (!p[1] || !p[1].files || !p[1].files.length) return;
+      var face = new FontFace("brand-" + p[0], "url(/brand/" + p[1].files[0] + ")");
+      face.load().then(function (ff) { document.fonts.add(ff); root.setProperty("--" + p[0], '"brand-' + p[0] + '", ' + (p[0] === "display" ? "Georgia, serif" : "system-ui, sans-serif")); });
+    });
+  }).catch(function () {});
+
+  fetch("/lines").then(function (r) { return r.json(); }).then(function (d) {
+    lines = d;
+    var first = lines.findIndex(function (l) { return !l.recorded; });
+    go(first < 0 ? 0 : first);
+  });
+})();
+</script>
+</body>
+</html>
