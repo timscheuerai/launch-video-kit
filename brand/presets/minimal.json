@@ -1,0 +1,20 @@
+{
+  "name": "Minimal",
+  "slug": "minimal",
+  "description": "Quiet light grounds, square-ish corners, no dive or collapse drama - every hero cuts cleanly. For a product that sells calm and precision over hype.",
+  "brand": {
+    "mode": "light",
+    "radius": 10
+  },
+  "film": {
+    "gap": 0.42,
+    "music": {
+      "bpm_scale": 0.95
+    }
+  },
+  "beats": {
+    "hero": { "ground": "light", "exit": "cut" },
+    "blocks": { "ground": "light" },
+    "end": { "hold": 4.0 }
+  }
+}

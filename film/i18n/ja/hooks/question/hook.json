@@ -1,0 +1,36 @@
+{
+  "about": "フリーフック: ライトグラウンドで 1 問、一語ずつ書かれます。 Swap the words for your reader's pain.",
+  "duration": 4,
+  "video": null,
+  "ground": "light",
+  "push": false,
+  "voice": null,
+  "text": [
+    {
+      "words": [
+        [
+          "*顧客は何を求めましたか?",
+          0.04
+        ]
+      ],
+      "out": 5,
+      "y": 520,
+      "size": 112
+    }
+  ],
+  "sfx": [
+    {
+      "t": 0.3,
+      "sound": "press",
+      "gain_db": -20
+    },
+    {
+      "t": 1.3,
+      "sound": "glass_tick",
+      "gain_db": -20,
+      "args": {
+        "degree": 2
+      }
+    }
+  ]
+}

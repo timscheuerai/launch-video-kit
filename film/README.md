@@ -23,4 +23,8 @@ film/render.sh type-only                                                        
 
 No voice yet? `python3 film/build.py type-only` still builds a silent animatic from the text, and `npx -y hyperframes@0.8.77 snapshot --at 5.5,8,12` (run inside `film/`) shows any second as a still.
 
+Need a vertical cut for TikTok/Reels/Shorts, or a square cut for Instagram feed/LinkedIn, instead of the landscape site/X cut? `python3 film/build.py type-only --aspect portrait` builds a 1080x1920 composition (output gets a `-v` suffix, e.g. `compositions/film-type-only-v.html`) and `--aspect square` builds a 1080x1080 one (`-sq` suffix); the default is `--aspect landscape` (1920x1080). `film/render.sh --format all type-only` builds and renders all 3 from the same `film.json` and brand kit in one pass: `renders/type-only.mp4`, `renders/type-only-vertical.mp4`, `renders/type-only-square.mp4`.
+
+Posting to a silent-autoplay feed (X, LinkedIn, Facebook)? Set `"captions": true` in `film.json` to burn in open captions, one cue per spoken body line, timed from the same word starts the picture already uses.
+
 Generated files (`compositions/`, `index-*.html`, `timing-*.json`, `renders/`, `mix/`, takes) are ignored by git and rebuilt on every run.

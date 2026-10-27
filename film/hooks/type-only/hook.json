@@ -2,12 +2,71 @@
   "about": "Free hook: 2 lines of type on the dark ground, no footage, no voice. The music's intro plays under it.",
   "duration": 5.0,
   "video": null,
-  "ground": "dark",
+  "ground": "accent",
   "push": true,
   "voice": null,
   "text": [
-    {"words": [["Your", 0.35], ["users", 0.55], ["tell", 0.78], ["you", 0.92], ["*everything.", 1.1]], "out": 2.45, "y": 520, "size": 118},
-    {"words": [["Then", 2.75], ["it", 3.0], ["gets", 3.15], ["*lost.", 3.45]], "out": 6.0, "y": 520, "size": 118}
+    {
+      "words": [
+        [
+          "Your",
+          0.04
+        ],
+        [
+          "users",
+          0.24
+        ],
+        [
+          "tell",
+          0.47
+        ],
+        [
+          "you",
+          0.61
+        ],
+        [
+          "*everything.",
+          0.79
+        ]
+      ],
+      "out": 2.45,
+      "y": 520,
+      "size": 118
+    },
+    {
+      "words": [
+        [
+          "Then",
+          2.75
+        ],
+        [
+          "it",
+          3.0
+        ],
+        [
+          "gets",
+          3.15
+        ],
+        [
+          "*lost.",
+          3.45
+        ]
+      ],
+      "out": 6.0,
+      "y": 520,
+      "size": 118
+    }
   ],
-  "sfx": [{"t": 0.35, "sound": "felt_thump", "gain_db": -18}, {"t": 2.75, "sound": "felt_thump", "gain_db": -18}]
+  "sfx": [
+    {
+      "t": 0.35,
+      "sound": "felt_thump",
+      "gain_db": -18
+    },
+    {
+      "t": 2.75,
+      "sound": "felt_thump",
+      "gain_db": -18
+    }
+  ]
 }

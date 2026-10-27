@@ -15,7 +15,7 @@ The standard for motion: supreme motion with room to breathe, clean type, fast, 
 python3 skills/launch-review/scripts/review.py film/renders/<hook>.mp4 film/review/<hook>-v1 --bpm 120 --words <words.json>
 ```
 
-Writes `report.md` (pass or warn per target), `filmstrip.jpg` (2 fps) and `contact.jpg` (12 frames). The same script studies a reference: `skills/launch-review/scripts/study_reference.sh <url> <out-dir> <bpm>` downloads it, grids it, transcribes it and runs the report. Keep the notes; never commit third-party video.
+Writes `report.md` (pass or warn per target), `filmstrip.jpg` (2 fps), `contact.jpg` (12 frames), and `report.html` - one self-contained page (every image inlined, nothing to serve) with a colour-coded scorecard, a to-scale timeline (hard cuts, soft transitions, the BPM grid, the tail-silence zone), an onset-density chart, and a before/after frame pair cropped automatically at every hard cut - the step 2 pair below, already pulled instead of a manual `hyperframes snapshot` per cut. Open it straight in a browser. Skip it with `--no-html` if you only want the numbers. The same script studies a reference: `skills/launch-review/scripts/study_reference.sh <url> <out-dir> <bpm>` downloads it, grids it, transcribes it and runs the report. Keep the notes; never commit third-party video.
 
 ## 2. Look
 

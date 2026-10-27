@@ -1,0 +1,134 @@
+{
+  "brand": "../brand",
+  "voice_dir": "vo/body/no-take-es",
+  "gap": 0.3,
+  "lines": {
+    "02": "Acme es su bandeja de entrada de comentarios.",
+    "03": "Cada solicitud de cada canal llega a una bandeja de entrada.",
+    "04": "Acme etiqueta cada uno y agrupa los patrones.",
+    "05": "Lo que importa ocupa un lugar destacado en su hoja de ruta.",
+    "06": "Bandeja de entrada, etiquetas y hoja de ruta, todo en un solo lugar.",
+    "07": "Comentarios de los clientes, en piloto automático."
+  },
+  "music": {
+    "file": "score/bed.wav",
+    "bpm": 120,
+    "drop": 6,
+    "gain_db": -3
+  },
+  "sound": {
+    "kit": null,
+    "key": "A"
+  },
+  "beats": [
+    {
+      "type": "name",
+      "line": "02",
+      "tagline": "es su bandeja de entrada *de *comentarios."
+    },
+    {
+      "type": "hero",
+      "line": "03",
+      "ground": "accent",
+      "text": "Cada *solicitud.",
+      "exit": "dive",
+      "until": "solicitud+0.35"
+    },
+    {
+      "type": "product",
+      "line": "03",
+      "src": "assets/screens/inbox.png",
+      "focus": [
+        0.02,
+        0.1,
+        0.46,
+        0.5
+      ],
+      "push_at": "llega",
+      "chip": {
+        "text": "12 nuevos",
+        "at": "entrada"
+      }
+    },
+    {
+      "type": "product",
+      "line": "04",
+      "src": "assets/screens/board.png",
+      "focus": [
+        0.3,
+        0.12,
+        0.42,
+        0.5
+      ],
+      "push_at": "etiqueta",
+      "cursor": {
+        "at": "agrupa",
+        "x": 0.5,
+        "y": 0.3
+      },
+      "chip": {
+        "text": "Etiquetado",
+        "at": "patrones"
+      }
+    },
+    {
+      "type": "hero",
+      "line": "05",
+      "ground": "accent",
+      "text": "Lo que *importa.",
+      "exit": "collapse",
+      "until": "importa+0.3"
+    },
+    {
+      "type": "product",
+      "line": "05",
+      "src": "assets/screens/roadmap.png",
+      "focus": [
+        0.05,
+        0.12,
+        0.6,
+        0.4
+      ],
+      "push_at": "en"
+    },
+    {
+      "type": "blocks",
+      "line": "06",
+      "items": [
+        "Bandeja de *entrada",
+        "*Etiquetas",
+        "Hoja de *ruta"
+      ],
+      "merge_at": "lugar",
+      "label": "Un *lugar."
+    },
+    {
+      "type": "switch",
+      "line": "07",
+      "text": "Retroalimentación, en piloto *automático.",
+      "flip_at": "automático"
+    },
+    {
+      "type": "end",
+      "hold": 3.5
+    }
+  ],
+  "_i18n": {
+    "source_lang": "en",
+    "target_lang": "es",
+    "target_name": "Spanish",
+    "generated_at": "2026-10-23T19:29:06.399Z",
+    "engine": "google-translate-unofficial (free, no key)",
+    "reviewed": false,
+    "voice": "silent animatic (no recorded take in this language) - record vo/body-equivalent takes and point voice_dir at them for a voiced render",
+    "lines_en": {
+      "02": "Acme is your feedback inbox.",
+      "03": "Every request from every channel lands in one inbox.",
+      "04": "Acme tags each one and groups the patterns.",
+      "05": "What matters rises to the top of your roadmap.",
+      "06": "Inbox, tags and roadmap, all in one place.",
+      "07": "Customer feedback, on autopilot."
+    },
+    "note": "Machine-translated. Word anchors (until/push_at/merge_at/flip_at/chip.at/cursor.at) were position-remapped, not semantically translated - they pick the translated word at the same place in the sentence the English anchor held, so build.py never crashes on a missing word. Have a native speaker read lines + on-screen text before this ships; set reviewed: true after."
+  }
+}

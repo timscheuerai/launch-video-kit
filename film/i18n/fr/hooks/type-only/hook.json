@@ -1,0 +1,72 @@
+{
+  "about": "Crochet gratuit : 2 lignes de type sur fond sombre, pas de séquence, pas de voix. L'intro de la musique joue en dessous.",
+  "duration": 5,
+  "video": null,
+  "ground": "accent",
+  "push": true,
+  "voice": null,
+  "text": [
+    {
+      "words": [
+        [
+          "Vos",
+          0.04
+        ],
+        [
+          "utilisateurs",
+          0.228
+        ],
+        [
+          "vous",
+          0.415
+        ],
+        [
+          "disent",
+          0.603
+        ],
+        [
+          "*tout.",
+          0.79
+        ]
+      ],
+      "out": 2.45,
+      "y": 520,
+      "size": 118
+    },
+    {
+      "words": [
+        [
+          "Ensuite,",
+          2.75
+        ],
+        [
+          "il",
+          2.983
+        ],
+        [
+          "se",
+          3.217
+        ],
+        [
+          "*perd.",
+          3.45
+        ]
+      ],
+      "out": 6,
+      "y": 520,
+      "size": 118
+    }
+  ],
+  "sfx": [
+    {
+      "t": 0.35,
+      "sound": "felt_thump",
+      "gain_db": -18
+    },
+    {
+      "t": 2.75,
+      "sound": "felt_thump",
+      "gain_db": -18
+    }
+  ]
+}

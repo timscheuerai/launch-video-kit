@@ -1,0 +1,21 @@
+{
+  "name": "Bold",
+  "slug": "bold",
+  "description": "Max contrast, fast cuts, dive exits. Every hero and blocks card sits on the accent colour instead of the ground. For a launch that wants attention, not comfort.",
+  "brand": {
+    "mode": "accent",
+    "radius": 28
+  },
+  "film": {
+    "gap": 0.22,
+    "music": {
+      "bpm_scale": 1.08,
+      "drop_scale": 0.9
+    }
+  },
+  "beats": {
+    "hero": { "ground": "accent", "exit": "dive" },
+    "blocks": { "ground": "accent" },
+    "end": { "hold": 3.0 }
+  }
+}

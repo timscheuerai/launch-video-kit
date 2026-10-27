@@ -2,8 +2,15 @@
   "name": "launch-video-kit",
   "private": true,
   "type": "module",
+  "bin": {
+    "launch-video-kit": "bin/cli.mjs"
+  },
   "scripts": {
-    "brand": "node tools/brand-from-url.mjs"
+    "brand": "node bin/cli.mjs brand",
+    "demo": "node bin/cli.mjs demo",
+    "render": "node bin/cli.mjs render",
+    "doctor": "node bin/cli.mjs doctor",
+    "capture": "node tools/capture-screens.mjs"
   },
   "dependencies": {
     "puppeteer": "^25.12.0"

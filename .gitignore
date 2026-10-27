@@ -6,8 +6,13 @@ __pycache__/
 *.pyc
 .DS_Store
 
+# the preview Worker's local build cache and secrets (worker/)
+.wrangler/
+.dev.vars
+
 # everything the film pipeline regenerates
 film/renders/
+/renders/
 film/snapshots/
 film/review/
 film/compositions/
@@ -30,3 +35,8 @@ film/score/bed.json
 
 # local private-term list for scripts/check-template.py
 scripts/private-terms.txt
+
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example

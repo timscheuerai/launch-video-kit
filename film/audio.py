@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
-"""Sound for a built film: python3 audio.py <hook>  (after build.py and the HyperFrames render)
+"""Sound for a built film: python3 audio.py <hook> [--aspect landscape|portrait|square]
+(after build.py --aspect <same> and the matching HyperFrames render)
 
   1. Music: the take in film.json "music" is placed so its drop lands on the cut, extended on its bar
      grid until the end card and faded over the last 2 s. A hook longer than the take's intro plays in
      silence before the drop unless the hook brings its own bed (hook.json sfx).
   2. Voice: the hook's line and the body's lines, stitched at the times build.py placed them.
-  3. Sound effects: 1 cue per visible event from timing-<hook>.json, voiced by the synthesised palette
-     (skills/launch-sound/scripts/sfx_forge.py) or by your own kit (film.json "sound": {"kit": "sfx/kit"}).
+  3. Sound effects: 1 cue per visible event from timing-<hook>[-v|-sq].json, voiced by the synthesised
+     palette (skills/launch-sound/scripts/sfx_forge.py) or by your own kit (film.json "sound.kit").
   4. Mix: skills/launch-mix/scripts/mixdown.py, -14 LUFS, -1 dBTP ceiling, muxed onto the picture.
 
-Master: renders/<hook>.mp4. Run it with the kit's Python (the .venv made from requirements.txt).
+--aspect must match what build.py rendered: landscape (default) reads timing-<hook>.json and masters
+to renders/<hook>.mp4; portrait reads timing-<hook>-v.json and masters to renders/<hook>-vertical.mp4;
+square reads timing-<hook>-sq.json and masters to renders/<hook>-square.mp4 - each with its own
+mix/sfx artifacts so the three can be built side by side. Run it with the kit's Python (the .venv
+made from requirements.txt).
 """
+import argparse
 import json
 import os
 import subprocess
@@ -23,10 +29,23 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 os.chdir(HERE)
 SK = os.path.normpath(os.path.join(HERE, "..", "skills"))
 PY = sys.executable
-HOOK_NAME = sys.argv[1] if len(sys.argv) > 1 else "type-only"
+
+ap = argparse.ArgumentParser()
+ap.add_argument("hook", nargs="?", default="type-only")
+ap.add_argument("--aspect", choices=("landscape", "portrait", "square"), default="landscape",
+                help="must match the --aspect build.py rendered (same timing/picture suffix)")
+cli = ap.parse_args()
+HOOK_NAME = cli.hook
+# landscape keeps the original, suffix-free names (renders/<hook>.mp4); vertical and square
+# get their own name and timing suffix so all three can be built side by side without
+# overwriting each other's music/voice/sfx/mix artifacts or final renders.
+TIMING_SUF = {"landscape": "", "portrait": "-v", "square": "-sq"}[cli.aspect]
+NAME = {"landscape": "", "portrait": "-vertical", "square": "-square"}[cli.aspect]
+OUT = f"{HOOK_NAME}{NAME}"
+
 FILM = json.load(open("film.json"))
 HOOK = json.load(open(f"hooks/{HOOK_NAME}/hook.json"))
-T = json.load(open(f"timing-{HOOK_NAME}.json"))
+T = json.load(open(f"timing-{HOOK_NAME}{TIMING_SUF}.json"))
 D, END = T["D"], T["END"]
 SR = 48000
 os.makedirs("mix", exist_ok=True)
@@ -68,7 +87,7 @@ if music.get("file") and os.path.exists(music["file"]):
     f0, f1 = int((END - 2.2) * sr), int((END - 0.3) * sr)
     env[f0:f1] = np.linspace(1, 0, f1 - f0) ** 2
     env[f1:] = 0
-    music_out = f"mix/music-{HOOK_NAME}.wav"
+    music_out = f"mix/music-{OUT}.wav"
     sf.write(music_out, placed * env[:, None], sr)
 else:
     print("note: no music (film.json music.file missing); a scratch bed: skills/launch-score/scripts/scratch_bed.py")
@@ -98,7 +117,7 @@ if not T.get("animatic"):
             s = int(p["start"] * SR)
             e = min(len(x), s + len(v))
             x[s:e] += v[: e - s, None]
-        voice_out = f"mix/voice-{HOOK_NAME}.wav"
+        voice_out = f"mix/voice-{OUT}.wav"
         sf.write(voice_out, x[: int(END * SR)], SR)
 else:
     print("note: animatic timing (no vo/body/lines.json): no voice in this mix")
@@ -158,14 +177,14 @@ for ev in T["events"]:
             cues.append(cue)
         else:
             cues.append({"t": round(t, 3), "sound": name, "gain_db": gain, "pan": ev.get("pan", 0), "args": a})
-cue_path = f"sfx/cues-{HOOK_NAME}.json"
+cue_path = f"sfx/cues-{OUT}.json"
 json.dump({"duration": END, "key": sound.get("key", "A"), "cues": cues}, open(cue_path, "w"), indent=1)
-sfx_out = f"sfx/sfx-{HOOK_NAME}.wav"
+sfx_out = f"sfx/sfx-{OUT}.wav"
 subprocess.run([PY, os.path.join(SK, "launch-sound/scripts/sfx_forge.py"), "render", cue_path, sfx_out], check=True)
 
 # ------------------------------------------------------------------ mix
-video = f"renders/{HOOK_NAME}-picture.mp4"
-mix = {"duration": END, "out": f"master-{HOOK_NAME}.wav",
+video = f"renders/{OUT}-picture.mp4"
+mix = {"duration": END, "out": f"master-{OUT}.wav",
        "sfx": {"file": f"../{sfx_out}", "gain_db": 0 if voice_out else -1},
        "duck": {"depth_db": 9, "attack": 0.05, "release": 0.3},
        "target_lufs": -14.0, "ceiling_dbtp": -1.3}
@@ -174,10 +193,10 @@ if music_out:
 if voice_out:
     mix["voice"] = {"file": f"../{voice_out}", "gain_db": 2, "start": 0}
 if os.path.exists(video):
-    mix["video"], mix["video_out"] = f"../{video}", f"../renders/{HOOK_NAME}.mp4"
+    mix["video"], mix["video_out"] = f"../{video}", f"../renders/{OUT}.mp4"
 else:
     print(f"note: no picture yet ({video}); mixing audio only")
-json.dump(mix, open(f"mix/mix-{HOOK_NAME}.json", "w"), indent=1)
-subprocess.run([PY, os.path.join(SK, "launch-mix/scripts/mixdown.py"), f"mix/mix-{HOOK_NAME}.json"], check=True)
+json.dump(mix, open(f"mix/mix-{OUT}.json", "w"), indent=1)
+subprocess.run([PY, os.path.join(SK, "launch-mix/scripts/mixdown.py"), f"mix/mix-{OUT}.json"], check=True)
 if os.path.exists(video):
-    print(f"master: film/renders/{HOOK_NAME}.mp4")
+    print(f"master: film/renders/{OUT}.mp4")

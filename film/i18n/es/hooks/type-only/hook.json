@@ -1,0 +1,72 @@
+{
+  "about": "Gancho gratuito: 2 líneas tipográficas en el suelo oscuro, sin imágenes, sin voz. La introducción de la música suena debajo.",
+  "duration": 5,
+  "video": null,
+  "ground": "accent",
+  "push": true,
+  "voice": null,
+  "text": [
+    {
+      "words": [
+        [
+          "Tus",
+          0.04
+        ],
+        [
+          "usuarios",
+          0.19
+        ],
+        [
+          "te",
+          0.34
+        ],
+        [
+          "lo",
+          0.49
+        ],
+        [
+          "cuentan",
+          0.64
+        ],
+        [
+          "*todo.",
+          0.79
+        ]
+      ],
+      "out": 2.45,
+      "y": 520,
+      "size": 118
+    },
+    {
+      "words": [
+        [
+          "Luego",
+          2.75
+        ],
+        [
+          "se",
+          3.1
+        ],
+        [
+          "*pierde.",
+          3.45
+        ]
+      ],
+      "out": 6,
+      "y": 520,
+      "size": 118
+    }
+  ],
+  "sfx": [
+    {
+      "t": 0.35,
+      "sound": "felt_thump",
+      "gain_db": -18
+    },
+    {
+      "t": 2.75,
+      "sound": "felt_thump",
+      "gain_db": -18
+    }
+  ]
+}

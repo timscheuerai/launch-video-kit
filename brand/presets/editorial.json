@@ -1,0 +1,20 @@
+{
+  "name": "Editorial",
+  "slug": "editorial",
+  "description": "Dark cards, collapse exits, a slower pace between lines. Reads like a magazine spread, not an ad - for a product that earns trust through restraint.",
+  "brand": {
+    "mode": "dark",
+    "radius": 4
+  },
+  "film": {
+    "gap": 0.38,
+    "music": {
+      "bpm_scale": 0.92
+    }
+  },
+  "beats": {
+    "hero": { "ground": "dark", "exit": "collapse" },
+    "blocks": { "ground": "dark" },
+    "end": { "hold": 4.5 }
+  }
+}

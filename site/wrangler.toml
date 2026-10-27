@@ -1,0 +1,8 @@
+# The comparison microsite: pure static assets, no Worker script needed.
+# Deploy: npx wrangler deploy   (run from this directory)
+name = "launch-video-kit-compare"
+compatibility_date = "2024-11-01"
+
+[assets]
+directory = "."
+not_found_handling = "404-page"

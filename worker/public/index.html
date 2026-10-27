@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Launch Video Kit - see your brand extracted</title>
+<meta name="description" content="Paste your website. See your colours, fonts, logo and name pulled out in under a minute, free, no account, before you install anything." />
+<style>
+  :root {
+    --ink: #0a0a0a; --ink-soft: #5b5b5b; --ground: #fafafa; --surface: #ffffff;
+    --accent: #111111; --accent-ink: #ffffff; --line: #e7e7e7; --danger: #b3261e;
+    --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--sans); }
+  main { max-width: 880px; margin: 0 auto; padding: 64px 24px 96px; }
+  h1 { font-size: clamp(32px, 5vw, 52px); line-height: 1.05; letter-spacing: -0.03em; margin: 0 0 14px; }
+  .lede { font-size: 19px; color: var(--ink-soft); max-width: 560px; margin: 0 0 36px; line-height: 1.5; }
+  form { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  input[type="url"] {
+    flex: 1 1 320px; font-size: 17px; padding: 15px 18px; border: 1.5px solid var(--line);
+    border-radius: 12px; background: var(--surface); color: var(--ink); font-family: var(--sans);
+  }
+  input[type="url"]:focus { outline: none; border-color: var(--ink); }
+  button {
+    font-size: 17px; font-weight: 600; padding: 15px 22px; border-radius: 12px; border: none;
+    background: var(--accent); color: var(--accent-ink); cursor: pointer; display: inline-flex;
+    align-items: center; gap: 8px; white-space: nowrap;
+  }
+  button:disabled { opacity: 0.55; cursor: default; }
+  button svg { width: 16px; height: 16px; flex: none; }
+  .hint { font-size: 13px; color: var(--ink-soft); margin: 0 0 48px; }
+  .hint code { font-family: var(--mono); background: var(--surface); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; }
+
+  #status { font-size: 14px; color: var(--ink-soft); min-height: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+  #status.err { color: var(--danger); }
+  .spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--ink); animation: sp 0.8s linear infinite; flex: none; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+
+  #result { display: none; }
+  #result.show { display: block; }
+  .shot {
+    width: 100%; border-radius: 16px; border: 1px solid var(--line); overflow: hidden;
+    background: var(--surface); margin-bottom: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .shot img { width: 100%; display: block; }
+  .kit { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
+  .card h3 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); font-weight: 600; }
+  .swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sw { width: 36px; height: 36px; border-radius: 9px; border: 1px solid rgba(0,0,0,0.08); flex: none; }
+  .card p { margin: 4px 0; font-size: 15px; line-height: 1.4; }
+  .card .name { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+  .card .tag { color: var(--ink-soft); }
+  .mono-small { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+  .cta-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  .cta-row a {
+    font-size: 15px; font-weight: 600; padding: 13px 20px; border-radius: 11px; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .cta-row a.primary { background: var(--accent); color: var(--accent-ink); }
+  .cta-row a.secondary { border: 1.5px solid var(--line); color: var(--ink); }
+  .cta-row a svg { width: 15px; height: 15px; }
+  footer { margin-top: 56px; font-size: 13px; color: var(--ink-soft); display: flex; gap: 16px; }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>See your brand extracted<br />before you install anything.</h1>
+  <p class="lede">Paste your website. In under a minute you get your colours, fonts, logo and name pulled out, free, no account - the exact brand kit <strong>launch-video-kit</strong> renders a launch film in.</p>
+
+  <form id="f">
+    <input id="url" type="url" inputmode="url" placeholder="your-site.com" required autocomplete="off" autofocus />
+    <button id="go" type="submit">
+      <span id="goLabel">Extract my brand</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
+    </button>
+  </form>
+  <p class="hint">Public sites only - no logins, no local/internal addresses. Server-side Chrome, nothing installed on your machine.</p>
+
+  <div id="status"></div>
+
+  <section id="result">
+    <div class="shot"><img id="shotImg" alt="Live screenshot of the extracted site" /></div>
+    <div class="kit">
+      <div class="card">
+        <h3>Identity</h3>
+        <p class="name" id="kName">...</p>
+        <p class="tag" id="kTagline">...</p>
+      </div>
+      <div class="card">
+        <h3>Colours</h3>
+        <div class="swatches" id="kSwatches"></div>
+      </div>
+      <div class="card">
+        <h3>Fonts</h3>
+        <p id="kDisplay">...</p>
+        <p class="mono-small" id="kBody">...</p>
+      </div>
+    </div>
+    <div class="cta-row">
+      <a class="primary" href="https://github.com/new?template_name=launch-video-kit&amp;template_owner=timscheuerai" target="_blank" rel="noopener">
+        Use this template
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
+      </a>
+      <a class="secondary" href="https://github.com/timscheuerai/launch-video-kit" target="_blank" rel="noopener">View the repo ↗</a>
+    </div>
+  </section>
+
+  <footer>
+    <a href="https://github.com/timscheuerai/launch-video-kit" target="_blank" rel="noopener">launch-video-kit</a>
+    <span>·</span>
+    <span>Nothing from your site is stored - this page only calls the API below once, in your browser.</span>
+  </footer>
+</main>
+<script>
+(function () {
+  var form = document.getElementById('f');
+  var input = document.getElementById('url');
+  var button = document.getElementById('go');
+  var goLabel = document.getElementById('goLabel');
+  var status = document.getElementById('status');
+  var result = document.getElementById('result');
+
+  function setStatus(text, isError) {
+    status.className = isError ? 'err' : '';
+    status.innerHTML = text ? (isError ? '' : '<span class="spin"></span>') + '<span>' + text + '</span>' : '';
+  }
+
+  function swatch(hex) {
+    var d = document.createElement('div');
+    d.className = 'sw';
+    d.style.background = hex;
+    d.title = hex;
+    return d;
+  }
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var url = input.value.trim();
+    if (!url) return;
+    button.disabled = true;
+    goLabel.textContent = 'Extracting…';
+    result.classList.remove('show');
+    setStatus('Opening ' + url + ' in a real browser, server-side…', false);
+
+    fetch('/api/preview', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ url: url }),
+    })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok || !j.ok) throw new Error(j.error || ('request failed (' + r.status + ')')); return j; }); })
+      .then(function (data) {
+        setStatus('Done in ' + (data.timingMs / 1000).toFixed(1) + 's.', false);
+        document.getElementById('shotImg').src = data.previewPng;
+        document.getElementById('kName').textContent = data.brand.name;
+        document.getElementById('kTagline').textContent = data.brand.tagline;
+        document.getElementById('kDisplay').textContent = 'Display: ' + data.brand.fonts.display.family + ' ' + data.brand.fonts.display.weight;
+        document.getElementById('kBody').textContent = 'Body: ' + data.brand.fonts.body.family + ' ' + data.brand.fonts.body.weight;
+        var sw = document.getElementById('kSwatches');
+        sw.innerHTML = '';
+        ['ground', 'accent', 'ink', 'surface', 'dark'].forEach(function (role) {
+          var hex = data.brand.colors[role];
+          if (hex) sw.appendChild(swatch(hex));
+        });
+        result.classList.add('show');
+      })
+      .catch(function (err) {
+        setStatus(err.message || 'Something went wrong - try a different URL.', true);
+      })
+      .finally(function () {
+        button.disabled = false;
+        goLabel.textContent = 'Extract my brand';
+      });
+  });
+})();
+</script>
+</body>
+</html>

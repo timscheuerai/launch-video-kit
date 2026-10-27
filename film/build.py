@@ -31,6 +31,9 @@ os.chdir(HERE)
 ap = argparse.ArgumentParser()
 ap.add_argument("hook", nargs="?", default="type-only")
 ap.add_argument("--brand", help="brand kit folder (default: film.json brand, else ../brand)")
+ap.add_argument("--aspect", choices=("landscape", "portrait", "square"), default="landscape",
+                help="stage shape: landscape 1920x1080 (site/X), portrait 1080x1920 (TikTok/Reels/Shorts) "
+                     "or square 1080x1080 (Instagram feed/LinkedIn)")
 args = ap.parse_args()
 
 FILM = json.load(open("film.json"))
@@ -42,7 +45,125 @@ BRAND_DIR = os.path.normpath(os.path.join(HERE, args.brand or FILM.get("brand", 
 if not os.path.exists(os.path.join(BRAND_DIR, "brand.json")):
     sys.exit(f"no brand kit at {BRAND_DIR}: run `npm run brand -- <your-url>` from the repo root first")
 BRAND = json.load(open(os.path.join(BRAND_DIR, "brand.json")))
-W, H = 1920, 1080
+
+ASPECT = args.aspect
+PORTRAIT = ASPECT == "portrait"
+SQUARE = ASPECT == "square"
+STACKED = PORTRAIT or SQUARE   # both crop to the 1080-wide stage; only the height differs
+W, H = (1920, 1080) if ASPECT == "landscape" else (1080, 1920) if PORTRAIT else (1080, 1080)
+SUF = {"landscape": "", "portrait": "-v", "square": "-sq"}[ASPECT]
+
+# The ground a beat should sit on depends on the brand, not on taste: `dark` is
+# near-black on a dark brand and near-white on a light one, and `accent` is the
+# inverse. Picking the wrong one is what turned whole beats into black cards.
+GROUND = "light" if BRAND.get("mode") == "light" else "accent"
+
+# Every position, type budget and camera constant in this kit is authored against a
+# 1920x1080 stage. A portrait or square film is not that frame scaled down: a line fitted to
+# 1680px overflows a 1080px stage, and a camera orbiting (960, 540) orbits a point
+# that is no longer the centre. So the numbers are re-derived per stage and handed
+# to the template as T.L, which is the single source of truth the animation reads.
+# Portrait and square share the same 1080px-wide stage, so every width-budgeted
+# constant (hero, line, card, blk*, chip X, cursor X, box/zoom W) is shared between
+# them; only the height-budgeted ones (chip Y, cursor Y, box/zoom H, boxMidY) change,
+# because square has 840px less vertical room than portrait to fit the same beats in.
+LAYOUT = {
+    "cx": W // 2,
+    "cy": H // 2,
+    "hero": 960 if STACKED else 1680,
+    "line": 960 if STACKED else 1700,
+    "card": 840 if STACKED else 1300,
+    "blk": 200 if STACKED else 250,
+    "blkB": 240 if STACKED else 310,
+    "chipX0": 60 if STACKED else 260,
+    "chipX1": W - 60 if STACKED else 1660,
+    "chipY0": 90 if SQUARE else 200 if PORTRAIT else 190,
+    "chipY1": (H - 260) if SQUARE else (H - 300) if PORTRAIT else 990,
+    "cursorX": 260 if STACKED else 420,
+    "cursorY": 110 if SQUARE else 200 if PORTRAIT else 260,
+    "heroMax": 104 if STACKED else 150,
+    "heroBudget": 900 if STACKED else 1560,
+    "blkMax": 84 if STACKED else 120,
+    "blkBudget": 960 if STACKED else 1500,
+    "boxW": 0.92 if STACKED else 0.8,
+    "boxH": 0.50 if SQUARE else 0.46 if PORTRAIT else 0.76,
+    "boxMidY": 0.52 if SQUARE else 0.60 if PORTRAIT else 565 / 1080,
+    "zoomW": 0.94 if STACKED else 0.84,
+    "zoomH": 0.52 if SQUARE else 0.46 if PORTRAIT else 0.8,
+}
+
+# The template's base rules are landscape pixel positions. Portrait re-centres the
+# ones that are not already centred by flex, and nothing else: any rule that reads
+# `left: 960px` is a landscape centre, so it becomes the portrait centre.
+PORTRAIT_CSS = """
+        /* ---- portrait stage (1080x1920): TikTok / Reels / Shorts ---- */
+        .hookv { width: 1080px; height: 1920px; }
+        .ent, .cam { width: 1080px; height: 1920px; }
+        .endp img { width: 1080px; height: 1920px; }
+        .nrow { top: 640px; height: 190px; }
+        .nmk { height: 158px; }
+        .nrow.only .nmk { height: 186px; }
+        .nword { font-size: 128px; }
+        .ntag { top: 906px; font-size: 54px; }
+        .hl { padding: 0 40px; }
+        .hg-clear .hl { top: 300px; }
+        /* left: 540px (not 0/right:0/justify-content:center) - renderBlocks() always applies
+           translate(-50%,-50%) to re-centre the row on its own left/top point; a full-width box
+           there gets shifted left by half the *stage* width instead of half its own, and the
+           blocks render mostly off the left edge. */
+        .brow { left: 540px; top: 720px; gap: 10px; }
+        .blk { width: 200px; height: 200px; gap: 14px; }
+        .blk img { width: 74px; height: 74px; }
+        .blk span { font-size: 32px; }
+        .blab { top: 430px; font-size: 78px; padding: 0 40px; }
+        .card { left: 540px; top: 800px; height: 210px; padding: 0 44px; gap: 56px; border-radius: 46px; }
+        .clab { font-size: 76px; }
+        .sw { width: 190px; height: 112px; border-radius: 56px; }
+        .knob { width: 90px; height: 90px; }
+        .chip { font-size: 30px; }
+        .erow { top: 660px; height: 190px; }
+        .emk { height: 158px; }
+        .erow.only .emk { height: 186px; }
+        .eword { font-size: 128px; }
+        .etag { top: 890px; font-size: 48px; }
+        .eurl { bottom: 120px; }
+        .captions { bottom: 150px; }
+"""
+
+# Square (1080x1080) shares portrait's 1080px-wide rules for anything measured from the
+# centre or from an edge inward (padding, widths, left offsets); only the vertical
+# placements shrink, because square has 840px less height than portrait to fit the
+# same name-row / tagline / blocks-row / card / end-card stack into.
+SQUARE_CSS = """
+        /* ---- square stage (1080x1080): Instagram feed / LinkedIn / in-feed video ---- */
+        .hookv { width: 1080px; height: 1080px; }
+        .ent, .cam { width: 1080px; height: 1080px; }
+        .endp img { width: 1080px; height: 1080px; }
+        .nrow { top: 300px; height: 160px; }
+        .nmk { height: 130px; }
+        .nrow.only .nmk { height: 158px; }
+        .nword { font-size: 112px; }
+        .ntag { top: 475px; font-size: 46px; }
+        .hl { padding: 0 40px; }
+        .hg-clear .hl { top: 130px; }
+        .brow { left: 540px; top: 330px; gap: 10px; }    /* left: 540px, see the portrait .brow comment above */
+        .blk { width: 180px; height: 180px; gap: 12px; }
+        .blk img { width: 64px; height: 64px; }
+        .blk span { font-size: 28px; }
+        .blab { top: 225px; font-size: 66px; padding: 0 40px; }
+        .card { left: 540px; top: 405px; height: 180px; padding: 0 44px; gap: 70px; border-radius: 46px; }
+        .clab { font-size: 64px; }
+        .sw { width: 170px; height: 100px; border-radius: 50px; }
+        .knob { width: 80px; height: 80px; }
+        .chip { font-size: 28px; }
+        .erow { top: 345px; height: 160px; }
+        .emk { height: 130px; }
+        .erow.only .emk { height: 158px; }
+        .eword { font-size: 112px; }
+        .etag { top: 470px; font-size: 42px; }
+        .eurl { bottom: 90px; }
+        .captions { bottom: 90px; }
+"""
 
 
 # ------------------------------------------------------------------ colour
@@ -258,6 +379,15 @@ def match_words(lid, parts, first_lead=0.06, lead=0.04, t0=None):
     return out
 
 
+def data_uri(path):
+    """Base64-inline a file so a beat never depends on how the renderer resolves paths."""
+    import base64
+    import mimetypes
+    mime = mimetypes.guess_type(path)[0] or "image/png"
+    with open(path, "rb") as fh:
+        return f"data:{mime};base64," + base64.b64encode(fh.read()).decode()
+
+
 def media_size(path):
     r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=p=0", path],
                        capture_output=True, text=True)
@@ -341,7 +471,13 @@ for i, r in enumerate(R):
         parts = words_of(b["text"])
         times = match_words(lid, parts)
         ground = b.get("ground", "dark")
-        size = b.get("size") or min(150, int(1560 / max(6, 0.56 * len(b["text"]))))
+        size = b.get("size") or min(LAYOUT["heroMax"], int(LAYOUT["heroBudget"] / max(6, 0.56 * len(b["text"]))))
+        # A hero line must never be wider than the stage. The template's fit() only
+        # shrinks once the web fonts are in, and anything it misses hangs off the
+        # edge - on a 1080-wide portrait stage that means the first word sits alone
+        # at the left with the rest of the line off-screen. Clamp it here instead:
+        # deterministic, and independent of when the fonts land.
+        size = min(size, int((W - 120) / max(6, 0.56 * len(b["text"]))))
         d.update({"exit": b.get("exit", "cut"), "ground": ground})
         beats_html.append(f'<div class="beat hero hg-{ground}" data-i="{i}"><div class="hbg"></div>'
                           f'<div class="hl" style="font-size:{size}px">{key_spans(parts, "hp", times)}</div></div>')
@@ -355,13 +491,13 @@ for i, r in enumerate(R):
         if not os.path.exists(src):
             sys.exit(f"product beat {i + 1}: no file {b['src']} (put screenshots or recordings under film/assets/)")
         mw, mh = media_size(src)
-        box_w, box_h = W * float(b.get("width", 0.8)), H * 0.76
+        box_w, box_h = W * float(b.get("width", LAYOUT["boxW"])), H * LAYOUT["boxH"]
         s = min(box_w / mw, box_h / mh)
         ww, hh = round(mw * s), round(mh * s)
-        x0, y0 = round((W - ww) / 2), round(565 - hh / 2)
+        x0, y0 = round((W - ww) / 2), round(H * LAYOUT["boxMidY"] - hh / 2)
         fx, fy, fw, fh = b.get("focus", [0.25, 0.2, 0.5, 0.5])
         push = word(lid, b["push_at"])[0] - 0.15 if b.get("push_at") else a + 0.55
-        zoom = min(W * 0.84 / (fw * ww), H * 0.8 / (fh * hh), float(b.get("max_zoom", 3.0)))
+        zoom = min(W * LAYOUT["zoomW"] / (fw * ww), H * LAYOUT["zoomH"] / (fh * hh), float(b.get("max_zoom", 3.0)))
         d.update({"win": [x0, y0, ww, hh], "focus": [x0 + fx * ww, y0 + fy * hh, fw * ww, fh * hh], "zoom": round(zoom, 4),
                   "push": round(push, 3), "enter": "pop" if prev_exit == "dive" else "settle" if prev_exit == "collapse" else "rise"})
         if b.get("cursor"):
@@ -381,7 +517,12 @@ for i, r in enumerate(R):
             media = (f'<video id="pv{i}" class="pmedia" src="{src}" data-start="{a:.3f}" data-duration="{e - a + 0.4:.3f}" '
                      f'data-media-start="{float(b.get("from", 0)):.3f}" muted playsinline></video>')
         else:
-            media = f'<img class="pmedia" src="{src}" alt="">'
+            # Inline the screenshot. A bare relative src leaves the renderer to
+            # resolve it against whatever root it bundles the project into, and when
+            # that misses, the beat's whole 3.6 s renders as an empty black card -
+            # which is what made this film read as "nothing happens". A data URI has
+            # no path to get wrong.
+            media = f'<img class="pmedia" src="{data_uri(src)}" alt="">'
         beats_html.append(f'<div class="beat product" data-i="{i}"><div class="ent"><div class="cam"><div class="pw" style="left:{x0}px;top:{y0}px;width:{ww}px;height:{hh}px">'
                           f'{media}</div></div></div>{chip_html}</div>')
         EVENTS.append({"t": a, "ev": "rise" if d["enter"] == "rise" else "land"})
@@ -398,7 +539,12 @@ for i, r in enumerate(R):
         for it, p in zip(items, parts):
             icon = f'<img src="{html.escape(it["icon"])}" alt="">' if it.get("icon") else ""
             blocks += f'<div class="blk">{icon}<span>{html.escape(p[0])}</span><i class="div"></i></div>'
-        beats_html.append(f'<div class="beat blocks" data-i="{i}"><div class="brow">{blocks}</div><div class="blab">{key_spans(label, "bw")}</div></div>')
+        # A blocks beat used to paint straight onto the root background, which is
+        # near-black on a dark brand - so the beat's six seconds read as an empty
+        # black card. It carries a ground now, same as a hero does.
+        blocks_ground = b.get("ground", GROUND)
+        d["ground"] = blocks_ground
+        beats_html.append(f'<div class="beat blocks hg-{blocks_ground}" data-i="{i}"><div class="hbg"></div><div class="brow">{blocks}</div><div class="blab">{key_spans(label, "bw")}</div></div>')
         EVENTS += [{"t": tt, "ev": "block", "n": k, "pan": ((k + 0.5) / len(times) * 2 - 1) * 0.45} for k, tt in enumerate(times)]
         EVENTS += [{"t": merge, "ev": "merge"}, {"t": lt, "ev": "label"}]
     elif typ == "switch":
@@ -418,7 +564,7 @@ for j, b in enumerate(overlays):
     parts = words_of(b["text"])
     times = match_words(b["line"], parts)
     until = word(b["line"], b["until"])[0] if b.get("until") else START[b["line"]] + LINES[b["line"]]["dur"] + 0.2
-    size = b.get("size") or min(120, int(1500 / max(6, 0.56 * len(b["text"]))))
+    size = b.get("size") or min(LAYOUT["blkMax"], int(LAYOUT["blkBudget"] / max(6, 0.56 * len(b["text"]))))
     beats_html.append(f'<div class="beat hero hg-clear" data-o="{j}"><div class="hl" style="font-size:{size}px">{key_spans(parts, "hp", times)}</div></div>')
     data.append({"type": "overlay", "a": times[0], "b": round(until, 3), "o": j})
     EVENTS.append({"t": times[0], "ev": "overlay"})
@@ -455,17 +601,39 @@ for L in HOOK.get("text", []):
     EVENTS += [{"t": at_, "ev": "hookword"} for w, at_ in L["words"][:1]]
 
 
+# ------------------------------------------------------------------ captions
+
+# Open captions, one cue per spoken body line (these are single sentences, short enough to
+# read as one caption), timed from the same line starts build.py already placed the picture
+# on. Off by default (film.json "captions": true turns them on) because a hand-art film that
+# is already captioned by its on-screen type doesn't need a second, redundant text layer -
+# but any film posted to a silent-autoplay feed (X, LinkedIn, Facebook) does.
+captions_html = ""
+if FILM.get("captions"):
+    cap_items = []
+    for lid in order:
+        a = START[lid]
+        b = START[lid] + LINES[lid]["dur"] + max(0.0, GAP - 0.05)
+        cap_items.append(f'<div class="cap" data-a="{a:.3f}" data-b="{b:.3f}">{html.escape(TEXT[lid])}</div>')
+    captions_html = f'<div class="captions">{"".join(cap_items)}</div>'
+
+
 # ------------------------------------------------------------------ write
 
-T = {"D": D, "END": END, "PUSH": bool(HOOK.get("push")), "HOOKGROUND": hook_ground, "BEATS": data,
+T = {"D": D, "END": END, "PUSH": bool(HOOK.get("push")), "HOOKGROUND": hook_ground, "BEATS": data, "L": LAYOUT,
      "C": {"on": [round(x) for x in C["accent"][:3]], "off": [round(x) for x in mix(C["ink"], C["ground"], 0.86)[:3]]}}
 tpl = open("templates/body.html").read()
 comp = (tpl.replace("__FONTFACES__", "\n        ".join(FONTFACES))
         .replace("__VARS__", "; ".join(f"{k}: {v}" for k, v in VARS.items()))
         .replace("__HOOKVIDEO__", hook_video).replace("__HOOKGROUND__", hook_ground).replace("__HOOKTEXT__", hook_text)
-        .replace("__BEATS__", "\n        ".join(beats_html)).replace("__T__", json.dumps(T)))
+        .replace("__BEATS__", "\n        ".join(beats_html)).replace("__CAPTIONS__", captions_html).replace("__T__", json.dumps(T))
+        .replace('data-width="1920" data-height="1080"', f'data-width="{W}" data-height="{H}"'))
+if PORTRAIT:
+    comp = comp.replace("</style>", PORTRAIT_CSS + "\n      </style>", 1)
+elif SQUARE:
+    comp = comp.replace("</style>", SQUARE_CSS + "\n      </style>", 1)
 os.makedirs("compositions", exist_ok=True)
-open(f"compositions/film-{HOOK_NAME}.html", "w").write(comp)
+open(f"compositions/film-{HOOK_NAME}{SUF}.html", "w").write(comp)
 INDEX = f'''<!doctype html>
 <html lang="en">
   <head>
@@ -490,11 +658,12 @@ INDEX = f'''<!doctype html>
   </body>
 </html>
 '''
-open(f"index-{HOOK_NAME}.html", "w").write(INDEX.replace("__COMP__", f"film-{HOOK_NAME}.html"))
-open("index.html", "w").write(INDEX.replace("__COMP__", f"film-{HOOK_NAME}.html"))
+open(f"index-{HOOK_NAME}{SUF}.html", "w").write(INDEX.replace("__COMP__", f"film-{HOOK_NAME}{SUF}.html"))
+if ASPECT == "landscape":
+    open("index.html", "w").write(INDEX.replace("__COMP__", f"film-{HOOK_NAME}.html"))
 placement = ([{"line": "hook", "start": HOOK["voice"]["at"], "file": HOOK["voice"]["file"]}] if HOOK.get("voice") else [])
 placement += [{"line": lid, "start": START[lid]} for lid in order]
 json.dump({"hook": HOOK_NAME, "D": D, "END": END, "animatic": ANIMATIC, "lines": placement, "beats": data,
-           "events": sorted(EVENTS, key=lambda x: x["t"]), "brand": BRAND.get("name")}, open(f"timing-{HOOK_NAME}.json", "w"), indent=1)
-print(f"{BRAND.get('name')} / {HOOK_NAME}: {END} s ({len(R)} beats, cut at {D} s, end card at {EA:.2f} s){' [animatic timing]' if ANIMATIC else ''}")
-print(f"render: npx -y hyperframes@0.8.77 render -c index-{HOOK_NAME}.html --quality looks --output renders/{HOOK_NAME}-picture.mp4")
+           "events": sorted(EVENTS, key=lambda x: x["t"]), "brand": BRAND.get("name")}, open(f"timing-{HOOK_NAME}{SUF}.json", "w"), indent=1)
+print(f"{BRAND.get('name')} / {HOOK_NAME}{SUF}: {END} s ({len(R)} beats, cut at {D} s, end card at {EA:.2f} s){' [animatic timing]' if ANIMATIC else ''}")
+print(f"render: npx -y hyperframes@0.8.77 render -c index-{HOOK_NAME}{SUF}.html --quality looks --output renders/{HOOK_NAME}{SUF}-picture.mp4")

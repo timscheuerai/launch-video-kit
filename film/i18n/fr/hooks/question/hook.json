@@ -1,0 +1,52 @@
+{
+  "about": "Crochet gratuit : 1 question sur le sol clair, écrite mot à mot. Échangez les mots pour la douleur de votre lecteur.",
+  "duration": 4,
+  "video": null,
+  "ground": "light",
+  "push": false,
+  "voice": null,
+  "text": [
+    {
+      "words": [
+        [
+          "Que",
+          0.04
+        ],
+        [
+          "demandaient",
+          0.34
+        ],
+        [
+          "vos",
+          0.64
+        ],
+        [
+          "*clients",
+          0.94
+        ],
+        [
+          "*?",
+          1.24
+        ]
+      ],
+      "out": 5,
+      "y": 520,
+      "size": 112
+    }
+  ],
+  "sfx": [
+    {
+      "t": 0.3,
+      "sound": "press",
+      "gain_db": -20
+    },
+    {
+      "t": 1.3,
+      "sound": "glass_tick",
+      "gain_db": -20,
+      "args": {
+        "degree": 2
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Skills
 
-10 agent skills for Claude Code, Codex and other coding agents. `launch-film` is the entry point; the others are its tool manuals. `.claude/skills` and `.agents/skills` point to this folder, so agents discover them when you open the repo. `catalog.json` lists every skill's name and description.
+11 agent skills for Claude Code, Codex and other coding agents. `launch-film` is the entry point; the others are its tool manuals. `.claude/skills` and `.agents/skills` point to this folder, so agents discover them when you open the repo. `catalog.json` lists every skill's name and description.
 
 | Order | Skill | Job |
 |---|---|---|
@@ -14,6 +14,7 @@
 | 7 | [launch-sound](launch-sound/SKILL.md) | 1 consistent, key-locked sound palette and the SFX stem; free synthesised forge. |
 | 8 | [launch-mix](launch-mix/SKILL.md) | Buses, ducking, logo drop-out, -14 LUFS master, laid onto the picture. |
 | 9 | [launch-review](launch-review/SKILL.md) | Measure the render, the eye checklist, the gap list and the scorecard; study a reference film. |
+| 10 | [launch-import](launch-import/SKILL.md) | Convert a competitor's flat, single-scene script export into this kit's 6-beat `film.json` grammar. |
 
 In the `film/` template, steps 5 to 8 run inside `film/build.py` and `film/audio.py`; you open those skills when you want to change how a beat looks or sounds.
 

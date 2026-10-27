@@ -1,0 +1,23 @@
+# Hosted brand-preview API: POST /api/preview {url} -> brand.json + preview.png, no local
+# install. See index.ts and extract.ts for the implementation, README.md in this folder for
+# the deploy step.
+name = "launch-video-kit-preview"
+main = "index.ts"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare Browser Rendering: runs a real headless Chrome per request via this binding,
+# driven by @cloudflare/puppeteer in index.ts. Needs the Workers Browser Rendering feature
+# enabled on the account (free tier includes a daily browser-minutes allowance; see
+# https://developers.cloudflare.com/browser-rendering/platform/limits/).
+[browser]
+binding = "MYBROWSER"
+
+# The landing page (public/index.html): served directly for any request that matches a file
+# in this directory, with index.ts's fetch() only ever invoked for the one path that doesn't
+# match a static file - POST /api/preview.
+[assets]
+directory = "./public"
+
+[observability]
+enabled = true

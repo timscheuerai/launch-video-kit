@@ -7,6 +7,7 @@
       <style>
         __FONTFACES__
         [data-composition-id="film"] { __VARS__; }
+        [data-composition-id="film"] { --ground-hi: rgba(38, 40, 80, 0.85); }
         #root { position: absolute; inset: 0; overflow: hidden; background: var(--dark); font-family: var(--font); color: var(--ink); }
         .late { visibility: hidden; }
 
@@ -119,6 +120,14 @@
         .eword span { display: inline-block; opacity: 0; }
         .etag { position: absolute; left: 0; right: 0; top: 585px; text-align: center; font-size: 52px; font-weight: var(--weight); letter-spacing: -0.03em; color: var(--ink2); opacity: 0; }
         .eurl { position: absolute; left: 0; right: 0; bottom: 92px; text-align: center; font-family: var(--mono); font-size: 26px; letter-spacing: 0.02em; color: var(--ink-soft); opacity: 0; }
+
+        /* open captions: one sentence at a time, burned in for silent-autoplay feeds (film.json "captions": true) */
+        .captions { position: absolute; left: 60px; right: 60px; bottom: 140px; z-index: 60; display: flex; justify-content: center; pointer-events: none; }
+        /* bottom: 0 (not top) so a 2-line wrap grows upward, off the safe area, never past the
+           stage's bottom edge - a caption is the one text layer whose line count depends on the
+           reader's own sentence length, so it is the one layer that cannot assume 1 line. */
+        .cap { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font-size: 42px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3;
+          color: #fff; text-shadow: 0 1px 0 #000, 0 -1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 3px 16px rgba(0, 0, 0, 0.6); opacity: 0; }
       </style>
       <div id="root" data-composition-id="film" data-width="1920" data-height="1080">
         <div class="hook">
@@ -138,6 +147,7 @@
         __BEATS__
           <div class="ring"></div>
           <svg class="cursor" viewBox="0 0 24 24"><path d="M4.2 2.6 19 12.1l-6.7 1.4-3.6 6.3z" fill="#111" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          __CAPTIONS__
         </div>
       </div>
       <script>
@@ -215,7 +225,7 @@
               d.row = el.querySelector(".brow"); d.blks = Array.prototype.slice.call(el.querySelectorAll(".blk")); d.lab = el.querySelector(".blab");
               d.divs = d.blks.map(function (b) { return b.querySelector(".div"); });
               d.words = Array.prototype.map.call(el.querySelectorAll(".bw"), function (w, wi) { return { el: w, at: d.label + 0.05 * wi, k: w.classList.contains("k") ? keyWord(w) : null }; });
-              var n = d.blks.length, size = n > 4 ? 250 : 310;
+              var n = d.blks.length, size = n > 4 ? T.L.blk : T.L.blkB;
               d.blks.forEach(function (b) { b.style.width = b.style.height = size + "px"; });
             } else if (d.type === "switch") {
               d.card = el.querySelector(".card"); d.knob = el.querySelector(".knob"); d.sw = el.querySelector(".sw");
@@ -228,14 +238,14 @@
           function measure() {
             beats.forEach(function (d) {
               if (d.hl) {
-                fit(d.hl, 1680);
+                fit(d.hl, T.L.hero);
                 // the dive goes through the key word
                 var ks = d.hl.querySelectorAll(".hp.k"), k = ks.length ? ks[ks.length - 1] : d.hl.lastElementChild;
                 if (k && d.hl.offsetWidth) d.hl.style.transformOrigin = ((k.offsetLeft + k.offsetWidth / 2) / d.hl.offsetWidth * 100).toFixed(2) + "% 50%";
               }
-              if (d.tag && d.type === "name") fit(d.tag, 1700);
-              if (d.lab) fit(d.lab, 1700);
-              if (d.card) { var lab = d.card.querySelector(".clab"); fit(lab, 1300); }
+              if (d.tag && d.type === "name") fit(d.tag, T.L.line);
+              if (d.lab) fit(d.lab, T.L.line);
+              if (d.card) { var lab = d.card.querySelector(".clab"); fit(lab, T.L.card); }
             });
           }
           measure(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
@@ -275,8 +285,8 @@
           function camera(d, t) {
             var z = 1 + 0.03 * cl((t - d.a) / 4), pp = io(cl((t - d.push) / 0.95));
             var fx = d.focus[0] + d.focus[2] / 2, fy = d.focus[1] + d.focus[3] / 2;
-            var s = z * Math.pow(d.zoom / z, pp), cx = mix(960, fx, pp), cy = mix(540, fy, pp);
-            return { s: s, tx: 960 - s * cx, ty: 540 - s * cy };
+            var s = z * Math.pow(d.zoom / z, pp), cx = mix(T.L.cx, fx, pp), cy = mix(T.L.cy, fy, pp);
+            return { s: s, tx: T.L.cx - s * cx, ty: T.L.cy - s * cy };
           }
           function renderProduct(d, t) {
             var k;
@@ -286,19 +296,26 @@
             var c = camera(d, t);
             d.cam.style.transform = "translate(" + c.tx.toFixed(2) + "px," + c.ty.toFixed(2) + "px) scale(" + c.s.toFixed(4) + ")";
             if (d.chip && d.chipEl) {
-              var ce = out4(cl((t - d.chip.t) / 0.3)), px = Math.max(260, Math.min(1660, c.tx + c.s * d.chip.x)), py = Math.max(190, Math.min(990, c.ty + c.s * d.chip.y));
+              var ce = out4(cl((t - d.chip.t) / 0.3)), px = Math.max(T.L.chipX0, Math.min(T.L.chipX1, c.tx + c.s * d.chip.x)), py = Math.max(T.L.chipY0, Math.min(T.L.chipY1, c.ty + c.s * d.chip.y));
               d.chipEl.style.opacity = t < d.chip.t ? 0 : Math.min(1, ce * 2).toFixed(3);
               d.chipEl.style.filter = blur(10 * (1 - ce));
               d.chipEl.style.transform = "translate(" + px.toFixed(1) + "px," + py.toFixed(1) + "px) translate(-50%,-100%) scale(" + (0.7 + 0.3 * ce).toFixed(4) + ")";
             }
           }
+          // open captions: show the one cue whose window contains t, swap instantly (no crossfade -
+          // mid-word fades read as a glitch at reading speed)
+          var caps = all(".cap").map(function (el) { return { el: el, a: parseFloat(el.getAttribute("data-a")), b: parseFloat(el.getAttribute("data-b")) }; });
+          function renderCaptions(t) {
+            caps.forEach(function (c) { c.el.style.opacity = t >= c.a && t < c.b ? 1 : 0; });
+          }
+
           var cursor = one(".cursor"), ring = one(".ring");
           function renderCursor(t) {
             var d = null;
             beats.forEach(function (b) { if (b.cursor && t >= b.cursor.t - 0.85 && t < Math.min(b.b, b.cursor.t + 0.6)) d = b; });
             if (!d) { cursor.style.opacity = 0; ring.style.opacity = 0; return; }
             var c = camera(d, t), x = c.tx + c.s * d.cursor.x, y = c.ty + c.s * d.cursor.y;
-            var m = io(cl((t - (d.cursor.t - 0.85)) / 0.72)), sx = x + 420 * (1 - m), sy = y + 260 * (1 - m);
+            var m = io(cl((t - (d.cursor.t - 0.85)) / 0.72)), sx = x + T.L.cursorX * (1 - m), sy = y + T.L.cursorY * (1 - m);
             var press = Math.sin(Math.PI * cl((t - d.cursor.t) / 0.16));
             cursor.style.opacity = (cl((t - (d.cursor.t - 0.85)) / 0.15) * (1 - cl((t - d.cursor.t - 0.4) / 0.2))).toFixed(3);
             cursor.style.transform = "translate(" + (sx - 10).toFixed(1) + "px," + (sy - 6).toFixed(1) + "px) scale(" + (1 - 0.15 * press).toFixed(4) + ")";
@@ -390,6 +407,7 @@
               if (vis) R[d.type](d, t);
             });
             renderCursor(t);
+            renderCaptions(t);
           }
           var tl = gsap.timeline({ paused: true });
           tl.fromTo(drv, { t: 0.001 }, { t: T.END, duration: T.END - 0.001, ease: "none", onUpdate: render, immediateRender: false }, 0.001);

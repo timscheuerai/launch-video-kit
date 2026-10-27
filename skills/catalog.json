@@ -41,6 +41,11 @@
       "path": "skills/launch-review/SKILL.md"
     },
     {
+      "name": "launch-import",
+      "description": "Convert a flat, single-scene competitor script export (shipvideo/Waymark/InVideo-style - one ad-hoc scene per line, no beat structure) into this kit's 6-beat film.json grammar (name, hero, product, blocks, switch, end), ready to render on the free path. Use for \"import a script\", \"I already have a video script\", \"convert from shipvideo\", \"I have scenes from another tool\", or when a reader arrives with someone else's export instead of a blank film.json.",
+      "path": "skills/launch-import/SKILL.md"
+    },
+    {
       "name": "launch-world",
       "description": "Tool manual under launch-film (backgrounds, plates, Blender glass and 3D shots, shader layers). Build the world a launch film lives in, in your own brand, with generated background plates (cost-gated), Blender for real 3D glass objects and camera moves rendered as alpha layers, WebGL shader layers for atmosphere, and the layer order, depth of field and grade that keep UI legible over living backgrounds. Use when a storyboard needs backgrounds, 3D or atmosphere, for \"background\", \"plate\", \"3D object\", \"glass\", \"Blender\", \"shader\", \"atmosphere\"; motion of the UI itself is launch-motion.",
       "path": "skills/launch-world/SKILL.md"

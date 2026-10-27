@@ -1,0 +1,21 @@
+{
+  "name": "Energetic",
+  "slug": "energetic",
+  "description": "Short gaps, a faster beat grid, dive exits on every hero. For a launch that wants momentum in the first 3 seconds over a polished hold.",
+  "brand": {
+    "mode": "accent",
+    "radius": 20
+  },
+  "film": {
+    "gap": 0.18,
+    "music": {
+      "bpm_scale": 1.15,
+      "drop_scale": 0.85
+    }
+  },
+  "beats": {
+    "hero": { "ground": "accent", "exit": "dive" },
+    "blocks": { "ground": "accent" },
+    "end": { "hold": 2.6 }
+  }
+}

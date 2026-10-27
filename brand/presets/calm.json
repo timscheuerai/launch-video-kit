@@ -1,0 +1,20 @@
+{
+  "name": "Calm",
+  "slug": "calm",
+  "description": "Round corners, light grounds, a longer hold on the logo at the end. For a wellness, finance or health product where urgency reads as untrustworthy.",
+  "brand": {
+    "mode": "light",
+    "radius": 24
+  },
+  "film": {
+    "gap": 0.5,
+    "music": {
+      "bpm_scale": 0.88
+    }
+  },
+  "beats": {
+    "hero": { "ground": "light", "exit": "cut" },
+    "blocks": { "ground": "light" },
+    "end": { "hold": 4.5 }
+  }
+}

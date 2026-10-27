@@ -29,7 +29,7 @@
     {
       "type": "hero",
       "line": "03",
-      "ground": "dark",
+      "ground": "accent",
       "text": "Every *request.",
       "exit": "dive",
       "until": "request+0.35"

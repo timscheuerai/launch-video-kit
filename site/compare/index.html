@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>launch-video-kit vs shipvideo, Waymark, InVideo, Arcade, Tella, lemo-opuscar</title>
+<meta name="description" content="A sourced, sortable comparison of launch-video-kit against shipvideo, Waymark, InVideo AI, Arcade, Tella and lemo-opuscar: entry price, free tier, licence and the one thing each gets wrong." />
+<style>
+  :root {
+    --ink: #0a0a0a; --ink-soft: #5b5b5b; --ground: #fafafa; --surface: #ffffff;
+    --accent: #111111; --accent-ink: #ffffff; --line: #e7e7e7; --good: #1f7a4d; --bad: #b3261e;
+    --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--sans); }
+  main { max-width: 1040px; margin: 0 auto; padding: 56px 24px 96px; }
+  h1 { font-size: clamp(28px, 4.4vw, 44px); line-height: 1.08; letter-spacing: -0.03em; margin: 0 0 14px; }
+  .lede { font-size: 18px; color: var(--ink-soft); max-width: 680px; margin: 0 0 28px; line-height: 1.55; }
+  .lede strong { color: var(--ink); }
+
+  .hero {
+    border-radius: 18px; overflow: hidden; border: 1px solid var(--line); margin-bottom: 40px;
+    background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .hero img { width: 100%; display: block; }
+  .hero figcaption { padding: 10px 16px; font-size: 13px; color: var(--ink-soft); border-top: 1px solid var(--line); }
+
+  .cta-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 44px; }
+  .cta-row a {
+    font-size: 15px; font-weight: 600; padding: 13px 20px; border-radius: 11px; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .cta-row a.primary { background: var(--accent); color: var(--accent-ink); }
+  .cta-row a.secondary { border: 1.5px solid var(--line); color: var(--ink); background: var(--surface); }
+  .cta-row a svg { width: 15px; height: 15px; }
+
+  h2 { font-size: 22px; letter-spacing: -0.01em; margin: 0 0 6px; }
+  .table-note { font-size: 14px; color: var(--ink-soft); margin: 0 0 18px; }
+
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); margin-bottom: 36px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; min-width: 860px; }
+  th, td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th {
+    position: sticky; top: 0; background: var(--surface); font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--ink-soft); cursor: pointer; user-select: none; white-space: nowrap;
+  }
+  thead th:hover { color: var(--ink); }
+  thead th .arrow { font-size: 10px; margin-left: 4px; opacity: 0.5; }
+  thead th.sorted .arrow { opacity: 1; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.us { background: rgba(31, 122, 77, 0.06); }
+  td.name { font-weight: 700; white-space: nowrap; }
+  td.name .badge {
+    display: inline-block; margin-left: 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; background: var(--good); color: #fff; padding: 2px 7px; border-radius: 5px; vertical-align: middle;
+  }
+  td .oss { color: var(--good); font-weight: 600; }
+  td .paid { color: var(--bad); font-weight: 600; }
+  .mono { font-family: var(--mono); font-size: 13px; }
+
+  .sources { font-size: 13px; color: var(--ink-soft); line-height: 1.6; border-top: 1px solid var(--line); padding-top: 20px; margin-top: 8px; }
+  .sources a { color: inherit; }
+  footer { margin-top: 48px; font-size: 13px; color: var(--ink-soft); display: flex; gap: 16px; flex-wrap: wrap; }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>launch-video-kit, compared</h1>
+  <p class="lede">Six tools that turn a product into a launch video, sourced and sorted: entry price, free tier, licence, and the one thing each one gets wrong. Click a column to re-sort. Numbers below are approximate and change often - verify current pricing before you decide; sources are linked at the bottom.</p>
+
+  <figure class="hero">
+    <img src="https://raw.githubusercontent.com/timscheuerai/launch-video-kit/main/assets/preview.gif" alt="The Acme example film: hook, the cut, hero words, the product at close range, the lockup - extracted from Acme's website and rendered on launch-video-kit's free path." loading="lazy" />
+    <figcaption>The Acme example: extracted from a fictional website and rendered on the free path - no account, no stock footage licence, no credit purchase.</figcaption>
+  </figure>
+
+  <div class="cta-row">
+    <a class="primary" href="https://github.com/new?template_name=launch-video-kit&amp;template_owner=timscheuerai" target="_blank" rel="noopener">
+      Use this template
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
+    </a>
+    <a class="secondary" href="https://github.com/timscheuerai/launch-video-kit" target="_blank" rel="noopener">View the repo &#8599;</a>
+  </div>
+
+  <h2>Entry price and free tier</h2>
+  <p class="table-note">Sorted by entry price, cheapest first. Click any column header to re-sort.</p>
+  <div class="tablewrap">
+    <table id="t">
+      <thead>
+        <tr>
+          <th data-k="name" data-t="s">Tool</th>
+          <th data-k="price" data-t="n">Entry price <span class="arrow">&#9662;</span></th>
+          <th data-k="free" data-t="s">Free tier</th>
+          <th data-k="license" data-t="s">Licence</th>
+          <th data-k="weak" data-t="s">What it gets wrong</th>
+        </tr>
+      </thead>
+      <tbody id="tb"></tbody>
+    </table>
+  </div>
+
+  <p class="sources">
+    Prices and limits checked 2026-10-23, from each vendor's own pricing page and, for
+    shipvideo and lemo-opuscar, their public GitHub repos. All six are compared in full in
+    <code class="mono">STRATEGY-2026-10-23.md</code> section 1 of this repo, including each
+    tool's single strongest feature (left out of the table above so it stays a fair
+    comparison, not a one-sided pitch). launch-video-kit's own paid-upgrade cost
+    (~30-60 Higgsfield credits, about $1.50-3 for a typical first real film) is sourced from
+    <a href="https://github.com/timscheuerai/launch-video-kit/blob/main/docs/costs.md" target="_blank" rel="noopener"><code class="mono">docs/costs.md</code></a>
+    in the same repo. Nothing here is a number we made up to sound cheap - change any of it
+    and open a PR.
+  </p>
+
+  <footer>
+    <a href="https://github.com/timscheuerai/launch-video-kit" target="_blank" rel="noopener">launch-video-kit</a>
+    <span>&middot;</span>
+    <a href="https://github.com/timscheuerai/launch-video-kit/blob/main/STRATEGY-2026-10-23.md" target="_blank" rel="noopener">full competitor notes</a>
+  </footer>
+</main>
+<script>
+(function () {
+  // Sourced 2026-10-23. `price` is the lowest confirmed monthly-equivalent entry cost in USD
+  // for anything beyond the free tier, used only to sort the table - the cell text is the
+  // real, qualified number (a "30-60 Higgsfield credits" one-time cost does not collapse to
+  // one monthly figure, so it sorts as 0 next to "Free" and reads with its own context).
+  var rows = [
+    {
+      name: 'launch-video-kit', us: true, price: 0,
+      priceText: 'Free (local toolchain)<br /><span class="mono">~$1.50-3</span> for a typical first real film (30-60 Higgsfield credits, on your own account)',
+      free: 'Full free path: brand kit, type-only hook, scratch voice/music/SFX, -14 LUFS master - no account',
+      license: '<span class="oss">MIT, self-hosted</span>',
+      weak: "Newest of the six (13 stars) - smaller community than lemo-opuscar's, no built-in 59-style gallery (yet)",
+    },
+    {
+      name: 'shipvideo (launchvideo.io)', price: 0,
+      priceText: 'Billed OpenComputer session per render (no published flat price)',
+      free: 'None published - every render is a billed cloud microVM session',
+      license: '<span class="paid">Proprietary deploy template</span> (366 ★, not self-hostable)',
+      weak: 'One ad-hoc HTML scene per prompt, no persistent beat structure, no brand-kit review step, nothing free or local',
+    },
+    {
+      name: 'Waymark', price: 350,
+      priceText: '<span class="mono">$350-399</span>/mo Starter; Team from <span class="mono">$1,125</span>/mo',
+      free: 'None',
+      license: '<span class="paid">Proprietary SaaS</span>',
+      weak: '2-4 final downloads/month on the entry tier; a 15-30s local-business TV spot generator, not a narrative "Apple-style" film',
+    },
+    {
+      name: 'InVideo AI', price: 17,
+      priceText: '<span class="mono">$17-28</span> to <span class="mono">$900-1,000</span>/mo, credit-metered',
+      free: '10 min/week, watermarked',
+      license: '<span class="paid">Proprietary SaaS</span>',
+      weak: 'Burns 3,000-30,000 credits per project; generic templates, no hero-word/product-push-in/logo beat grammar',
+    },
+    {
+      name: 'Arcade.software', price: 42.5,
+      priceText: '<span class="mono">$42.50</span>/seat/mo (Growth, annual)',
+      free: '1 demo + 1 video, watermarked',
+      license: '<span class="paid">Proprietary SaaS</span>',
+      weak: 'Screen-capture/annotation, not a cinematic edit - no voice, music or beat-matched cuts, no brand extraction from a URL',
+    },
+    {
+      name: 'Tella', price: 13,
+      priceText: '<span class="mono">$13</span>/mo Pro, <span class="mono">$19</span>/mo Premium (annual)',
+      free: 'None as of mid-2026',
+      license: '<span class="paid">Proprietary SaaS</span>',
+      weak: 'Screen recording only - no hook/hero/product/logo structure, no brand-kit step, no code you own',
+    },
+    {
+      name: 'lemomo-ai/lemo-opuscar', price: 0,
+      priceText: 'Free',
+      free: 'Fully free and self-hosted',
+      license: '<span class="oss">MIT, self-hosted</span> (5,568 ★)',
+      weak: 'No website-to-brand-kit extraction, no forced-alignment narration timing - a general 59-style library, not a launch-specific product',
+    },
+  ];
+
+  var tbody = document.getElementById('tb');
+  var state = { key: 'price', dir: 1 };
+
+  function render() {
+    var sorted = rows.slice().sort(function (a, b) {
+      var av = a[state.key], bv = b[state.key];
+      if (typeof av === 'string') { av = av.toLowerCase(); bv = bv.toLowerCase(); }
+      if (av < bv) return -1 * state.dir;
+      if (av > bv) return 1 * state.dir;
+      return 0;
+    });
+    tbody.innerHTML = sorted.map(function (r) {
+      return '<tr' + (r.us ? ' class="us"' : '') + '>' +
+        '<td class="name">' + r.name + (r.us ? '<span class="badge">this kit</span>' : '') + '</td>' +
+        '<td>' + r.priceText + '</td>' +
+        '<td>' + r.free + '</td>' +
+        '<td>' + r.license + '</td>' +
+        '<td>' + r.weak + '</td>' +
+        '</tr>';
+    }).join('');
+    document.querySelectorAll('thead th').forEach(function (th) {
+      th.classList.toggle('sorted', th.getAttribute('data-k') === state.key);
+      var arrow = th.querySelector('.arrow');
+      if (arrow) arrow.innerHTML = th.getAttribute('data-k') === state.key ? (state.dir === 1 ? '&#9662;' : '&#9652;') : '&#9662;';
+    });
+  }
+
+  document.querySelectorAll('thead th').forEach(function (th) {
+    th.addEventListener('click', function () {
+      var key = th.getAttribute('data-k');
+      if (state.key === key) state.dir *= -1; else { state.key = key; state.dir = 1; }
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
